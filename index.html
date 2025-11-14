@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Planet Clicker - VIP System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Comic Neue', cursive;
+    text-align: center;
+    background: radial-gradient(circle at center, #001133, #000022, #000011);
+    color: white;
+    overflow: hidden;
+}
+
+h1 { 
+    margin-top: 20px; 
+    font-size: 48px; 
+    text-shadow: 3px 3px 8px #000; 
+}
+
+#planet {
+    width: 500px;
+    max-width: 90vw;
+    cursor: pointer;
+    margin-top: 20px;
+    user-select: none;
+    border-radius: 50%;
+    filter: contrast(1.5) saturate(2) brightness(1.2) drop-shadow(0 0 20px #00ffff);
+    animation: float 2s ease-in-out infinite alternate;
+    transition: transform 0.1s ease, filter 0.3s ease;
+}
+#planet:active { transform: scale(0.9); }
+
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+#score { 
+    font-size: 42px; 
+    margin-top: 20px; 
+    color: #00ffcc; 
+    text-shadow: 2px 2px 5px #000; 
+}
+
+.particle { 
+    position: absolute; 
+    width: 14px; 
+    height: 14px; 
+    border-radius: 50%; 
+    pointer-events: none; 
+}
+
+#shop {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 300px;
+    background: rgba(255,255,255,0.2);
+    border: 3px solid white;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: left;
+    font-size: 18px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 15px 4px rgba(255,255,255,0.3);
+}
+
+.upgrade {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #fff;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 18px;
+}
+
+.upgrade:hover { transform: scale(1.08); }
+
+#stronger { background: #ff9c00; }
+#auto { background: #00ccff; }
+#recycle { background: #3baa3b; }
+#sunpower { background: #ff4c4c; }
+#treepower { background: #77ff77; }
+#oceanboost { background: #0099ff; }
+
+#warning {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,0,0,0.85);
+    padding: 10px 20px;
+    font-size: 20px;
+    border-radius: 8px;
+    display: none;
+    z-index: 1000;
+}
+
+#planetsBtn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4c4c;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    border: 3px solid #fff;
+    border-radius: 16px;
+    padding: 15px 30px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #cc0000;
+    transition: all 0.1s ease;
+}
+#planetsBtn:active {
+    transform: translateX(-50%) translateY(4px);
+    box-shadow: 0 1px 0 #cc0000;
+}
+
+/* Side Buttons */
+.side-btn {
+    position: fixed;
+    left: 20px;
+    width: 180px;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 12px;
+    border: 3px solid #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #555;
+    transition: transform 0.2s cubic-bezier(.25,.8,.25,1), box-shadow 0.1s ease;
+    background-color: #222;
+    color: #fff;
+}
+
+/* Assign unique top positions to prevent overlap */
+#vip { top: 20px; }
+#double { top: 100px; }
+#hacks { top: 180px; }
+
+/* Jump up and stay while hovered */
+.side-btn:hover {
+    transform: translateY(-15px) scale(1.1, 1.05);
+    box-shadow: 0 8px 0 #555;
+}
+
+.side-btn:active {
+    transform: translateY(-10px) scale(1.05, 1);
+    box-shadow: 0 4px 0 #555;
+}
+
+.side-btn span.desc {
+    display: none;
+    font-size: 12px;
+    font-weight: normal;
+    color: #ffeb3b;
+    margin-top: 4px;
+}
+
+.side-btn:hover span.desc {
+    display: block;
+}
+
+/* Panels */
+#planetPanel, #hacksPanel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 16px;
+    padding: 20px;
+    display: none;
+    z-index: 1000;
+    color: #fff;
+    text-align: left;
+    font-family: 'Comic Neue', cursive;
+}
+
+#planetPanel { background: rgba(0,0,0,0.85); border: 3px solid white; }
+#hacksPanel { background: rgba(0,0,0,0.9); border: 3px solid #00ffff; }
+
+.planet, .hack-btn {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.planet:hover, .hack-btn:hover { transform: scale(1.05); }
+.planet.locked { opacity: 0.4; cursor: not-allowed; }
+
+.hack-btn {
+    background: #ffcc00;
+    color: #000;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+}
+
+.hack-btn#closeHacks { background:#ff4444; color:#fff; }
+</style>
+</head>
+<body>
+<h1>🪐 Planet Clicker!</h1>
+<div id="score">Score: 0</div>
+<img id="planet" src="https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" alt="Planet" draggable="false">
+
+<div id="shop">
+    <h3>🛒 Upgrades</h3>
+    <div class="upgrade" id="stronger">+1 per click (Cost: 50)</div>
+    <div class="upgrade" id="auto">Auto-click +1/sec (Cost: 100)</div>
+    <div class="upgrade" id="recycle">Recycle Bonus +2 (Cost: 150)</div>
+    <div class="upgrade" id="sunpower">Solar Energy +5/sec (Cost: 300)</div>
+    <div class="upgrade" id="treepower">Tree Planting +3 per click (Cost: 200)</div>
+    <div class="upgrade" id="oceanboost">Ocean Boost +4/sec (Cost: 400)</div>
+</div>
+
+<div id="warning">Not Enough Clicks!</div>
+
+<button id="planetsBtn">Planets</button>
+
+<!-- Side Buttons -->
+<button class="side-btn" id="vip">
+    VIP
+    <span class="desc">Unlock special powers! Cost: 1 trillion clicks. Grants access to Hacks and Double Money.</span>
+</button>
+
+<button class="side-btn" id="double">
+    Double Money
+    <span class="desc">Doubles your click power. VIP required. Cost increases per planet.</span>
+</button>
+
+<button class="side-btn" id="hacks">
+    Hacks
+    <span class="desc">VIP only! Gain bonus clicks, random boosts, or temporarily double click power.</span>
+</button>
+
+<!-- Panels -->
+<div id="planetPanel">
+    <h3>🪐 Travel to Planets</h3>
+    <div id="planetList"></div>
+    <button id="closePlanetPanel" style="margin-top:10px; padding:8px 16px; font-weight:bold; cursor:pointer;">Close</button>
+</div>
+
+<div id="hacksPanel">
+    <h3>💻 Cool Hacks</h3>
+    <div class="hack-btn" id="add1000">+1,000 Clicks</div>
+    <div class="hack-btn" id="addRandom">Random Boost (+1 to +100 Clicks)</div>
+    <div class="hack-btn" id="doubleClicks">Double Click Power for 10 sec</div>
+    <div class="hack-btn" id="closeHacks">Close</div>
+</div>
+
+<audio id="dingSound">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-uplifting-game-notification-ding-269.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+let score = 0;
+let clickPower = 1;
+let autoClicks = 0;
+let vipPurchased = false;
+let doubleMoneyPurchased = false;
+
+const planetImg = document.getElementById("planet");
+const scoreDisplay = document.getElementById("score");
+const dingSound = document.getElementById("dingSound");
+const warning = document.getElementById("warning");
+
+function updateScore() { scoreDisplay.textContent = "Score: " + score; }
+function showWarning() { warning.style.display="block"; setTimeout(()=>warning.style.display="none",1000); }
+
+planetImg.addEventListener("click", ()=>{
+    score += clickPower;
+    if(doubleMoneyPurchased) score += clickPower;
+    updateScore();
+    dingSound.currentTime=0; dingSound.play();
+});
+
+// Upgrade system
+function buyUpgrade(costObj, increment, element, textTemplate){
+    if(score >= costObj.value){
+        score -= costObj.value;
+        increment();
+        costObj.value *= 2;
+        element.textContent = textTemplate(costObj.value);
+        updateScore();
+    } else showWarning();
+}
+
+const upgrades = [
+    {btn: 'stronger', obj: {value:50}, inc: ()=>clickPower++, txt: v=>`+1 per click (Cost: ${v})`},
+    {btn: 'auto', obj: {value:100}, inc: ()=>autoClicks++, txt: v=>`Auto-click +1/sec (Cost: ${v})`},
+    {btn: 'recycle', obj: {value:150}, inc: ()=>clickPower+=2, txt: v=>`Recycle Bonus +2 (Cost: ${v})`},
+    {btn: 'sunpower', obj: {value:300}, inc: ()=>autoClicks+=5, txt: v=>`Solar Energy +5/sec (Cost: ${v})`},
+    {btn: 'treepower', obj: {value:200}, inc: ()=>clickPower+=3, txt: v=>`Tree Planting +3 per click (Cost: ${v})`},
+    {btn: 'oceanboost', obj: {value:400}, inc: ()=>autoClicks+=4, txt: v=>`Ocean Boost +4/sec (Cost: ${v})`}
+];
+
+upgrades.forEach(u => {
+    const btn = document.getElementById(u.btn);
+    btn.addEventListener("click", ()=>buyUpgrade(u.obj, u.inc, btn, u.txt));
+});
+
+setInterval(()=>{ if(autoClicks>0){ score+=autoClicks; updateScore(); } },1000);
+
+// VIP, Double Money, Hacks
+const vipBtn = document.getElementById("vip");
+const doubleBtn = document.getElementById("double");
+const hacksBtn = document.getElementById("hacks");
+const hacksPanel = document.getElementById("hacksPanel");
+
+const add1000 = document.getElementById("add1000");
+const addRandom = document.getElementById("addRandom");
+const doubleClicksBtn = document.getElementById("doubleClicks");
+const closeHacks = document.getElementById("closeHacks");
+
+const vipCost = 1e12;
+
+function updateSideButtons(){
+    hacksBtn.disabled = !vipPurchased;
+    doubleBtn.disabled = !vipPurchased;
+    hacksBtn.style.opacity = vipPurchased?1:0.5;
+    doubleBtn.style.opacity = vipPurchased?1:0.5;
+}
+
+vipBtn.addEventListener("click", ()=>{
+    if(score >= vipCost){
+        score -= vipCost;
+        vipPurchased = true;
+        doubleMoneyPurchased = true;
+        updateSideButtons();
+        updateScore();
+    } else showWarning();
+});
+
+hacksBtn.addEventListener("click", ()=>{ if(vipPurchased) hacksPanel.style.display="block"; else showWarning(); });
+
+doubleBtn.addEventListener("click", ()=>{
+    if(vipPurchased && !doubleMoneyPurchased){
+        doubleMoneyPurchased = true;
+    } else showWarning();
+});
+
+// Hacks functionality
+add1000.addEventListener("click", ()=>{ if(vipPurchased){ score+=1000; updateScore(); } else showWarning(); });
+addRandom.addEventListener("click", ()=>{ if(vipPurchased){ score+=Math.floor(Math.random()*100)+1; updateScore(); } else showWarning(); });
+doubleClicksBtn.addEventListener("click", ()=>{
+    if(vipPurchased){ clickPower *= 2; setTimeout(()=>clickPower/=2,10000); } else showWarning();
+});
+closeHacks.addEventListener("click", ()=>{ hacksPanel.style.display="none"; });
+
+// Planet System
+const planetsBtn = document.getElementById("planetsBtn");
+const planetPanel = document.getElementById("planetPanel");
+const planetList = document.getElementById("planetList");
+const closePlanetPanel = document.getElementById("closePlanetPanel");
+
+const planets = [
+    {name:"Earth", img:"https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg", cost:0},
+    {name:"Moon", img:"https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg", cost:1e5},
+    {name:"Mars", img:"https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg", cost:5e5},
+    {name:"Venus", img:"https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg", cost:1e6},
+    {name:"Jupiter", img:"https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg", cost:5e6},
+    {name:"Saturn", img:"https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg", cost:1e7}
+];
+
+planetsBtn.addEventListener("click", ()=>{
+    planetPanel.style.display="block";
+    planetList.innerHTML = "";
+    planets.forEach((p,index)=>{
+        const btn = document.createElement("div");
+        btn.classList.add("planet");
+        btn.textContent = p.name + (score >= p.cost?"":" (Locked)");
+        btn.style.background = score >= p.cost?"#00ccff":"#555";
+        btn.style.cursor = score >= p.cost?"pointer":"not-allowed";
+        btn.addEventListener("click", ()=>{
+            if(score >= p.cost){
+                planetImg.src = p.img;
+                planetImg.alt = p.name;
+                planetPanel.style.display="none";
+            } else showWarning();
+        });
+        planetList.appendChild(btn);
+    });
+});
+
+closePlanetPanel.addEventListener("click", ()=>{ planetPanel.style.display="none"; });
+
+updateScore();
+updateSideButtons();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
